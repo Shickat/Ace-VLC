@@ -293,13 +293,13 @@ button:hover {
     <h2 style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem;">🕒 Horario del Servidor</h2>
     <table style="width: 100%; border-collapse: collapse; font-size: 1rem;">
       <tbody>
-        <tr><td style="padding: 6px 10px;">Lunes</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
-        <tr><td style="padding: 6px 10px;">Martes</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
-        <tr><td style="padding: 6px 10px;">Miércoles</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
-        <tr><td style="padding: 6px 10px;">Jueves</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
-        <tr><td style="padding: 6px 10px;">Viernes</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
-        <tr><td style="padding: 6px 10px;">Sábado</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
-        <tr><td style="padding: 6px 10px;">Domingo</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Lunes</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Martes</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Miércoles</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Jueves</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Viernes</td><td style="padding: 6px 10px; text-align: right;">00:00 - 23:59</td></tr>
+        <tr><td style="padding: 6px 10px;">Sábado</td><td style="padding: 6px 10px; text-align: right;">00:00 - 23:59</td></tr>
+        <tr><td style="padding: 6px 10px;">Domingo</td><td style="padding: 6px 10px; text-align: right;">00:00 - 23:59</td></tr>
       </tbody>
     </table>
   </div>
@@ -344,7 +344,7 @@ button:hover {
       <span class="faq-icon"></span>
     </button>
     <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
-      El servidor está diseñado para manejar aproximadamente más de 15 personas. Si se supera, puede haber interrupciones.
+      El servidor está diseñado para manejar hasta 100 personas. Si se supera, puede haber interrupciones.
     </div>
   </div>
 
@@ -404,7 +404,7 @@ button:hover {
         return;
       }
 
-      finalUrl = `http://34.172.252.191:8000/pid/${pid}/stream.mp4`;
+      finalUrl = `http://35.225.33.206:8000/pid/${pid}/stream.mp4`;
       document.getElementById('linkOutput').innerText = finalUrl;
       document.getElementById('acestreamInput').value = '';
       document.getElementById('resultado').style.display = 'block';
@@ -461,13 +461,13 @@ button:hover {
       const minutos = ahora.getMinutes();
 
       const horarios = {
-        0: ['07:00', '01:30'],
-        1: ['11:00', '23:59'],
-        2: ['11:00', '23:59'],
-        3: ['11:00', '23:59'],
-        4: ['11:00', '23:59'],
-        5: ['07:00', '01:30'],
-        6: ['07:00', '01:30'],
+        0: ['00:00', '23:59'],
+        1: ['07:00', '01:30'],
+        2: ['07:00', '01:30'],
+        3: ['07:00', '01:30'],
+        4: ['07:00', '01:30'],
+        5: ['00:00', '23:59'],
+        6: ['00:00', '23:59'],
       };
 
       function horaAminutos(horaStr) {
