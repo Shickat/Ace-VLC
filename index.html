@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>AceStream a VLC (Beta)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="Logo/Logo.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #f1f1f1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+input, button {
+  padding: 0.8rem;
+  margin: 0.5rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: 0.3s ease;
+}
+
+input {
+  width: 90%;
+  max-width: 500px;
+  background-color: #1b1f2b;
+  color: #fff;
+  border: 2px solid #4dd0e1;
+}
+
+input::placeholder {
+  color: #aaa;
+}
+
+button {
+  background: linear-gradient(90deg, #00c9ff, #92fe9d);
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 255, 200, 0.6);
+}
+
+.output {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #1e2738;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  word-break: break-word;
+  max-width: 90%;
+  text-align: center;
+}
+
+.btns {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+#copiadoMsg {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #76ff03;
+  display: none;
+  text-align: center;
+}
+
+#selector {
+  display: none;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.tutorial {
+  display: none;
+  margin-top: 1rem;
+  background-color: #263245;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+  max-width: 800px;
+}
+
+.paso {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.paso img {
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+
+.paso img:hover {
+  transform: scale(1.05);
+}
+
+.error-msg {
+  color: #ff6b6b;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+  display: none;
+}
+
+.img-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.img-overlay img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+.img-overlay .close-btn {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 2rem;
+  color: #fff;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.faq-item {
+  background-color: #1b2533 !important;
+  border-left: 5px solid #00c9ff !important;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  transition: transform 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+
+.faq-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.faq-question {
+  background: none !important;
+  color: #f1f1f1 !important;
+  font-weight: bold;
+  cursor: pointer;
+  padding-right: 2rem;
+  position: relative;
+}
+
+.faq-question:hover {
+  transform: none !important;
+}
+
+
+.faq-question::after {
+  content: '▶';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.3s ease;
+  font-size: 1.1rem;
+  color: #00c9ff;
+}
+
+.faq-item.open .faq-question::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.faq-answer {
+  margin-top: 0.5rem;
+  color: #ddd !important;
+  padding-left: 0.5rem;
+}
+
+@media (min-width: 600px) {
+  .btns {
+    flex-direction: row;
+  }
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Indicador de estado del servidor -->
+  <div id="estado-servidor" style="position: absolute; top: 1rem; right: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; font-weight: bold;">
+    <span id="estado-texto">Cargando...</span>
+    <span id="estado-circulo" style="width: 12px; height: 12px; border-radius: 50%; background-color: gray;"></span>
+  </div>
+
+  <h1>Reproducir AceStream en VLC (Beta)</h1>
+
+  <input type="text" id="acestreamInput" placeholder="Pega el enlace AceStream o el hash">
+  <button onclick="generar()">Generar enlace</button>
+
+  <div id="errorMsg" class="error-msg"></div>
+
+  <div id="resultado" class="output" style="display:none;">
+    <div id="linkOutput"></div>
+
+    <div class="btns">
+      <button onclick="copiar()">📋 Copiar enlace</button>
+      <button onclick="mostrarSelector()">❓ ¿Cómo abrir en VLC?</button>
+    </div>
+  </div>
+
+  <div id="copiadoMsg">¡Enlace copiado!</div>
+
+  <div id="selector">
+    <p><strong>Selecciona tu dispositivo:</strong></p>
+    <button onclick="mostrarTutorial('pc')">🖥️ PC</button>
+    <button onclick="mostrarTutorial('movil')">📱 Móvil</button>
+  </div>
+
+  <!-- Tutorial PC -->
+  <div id="tutorial-pc" class="tutorial">
+    <h2 style="text-align: center;">Tutorial para PC</h2>
+    <div class="paso">
+      <p>1. Abre VLC Media Player</p>
+    </div>
+    <div class="paso">
+      <p>2. Ve a "Medio &gt; Abrir ubicación de red..."</p>
+      <img src="Tutorial/PC/1.png" alt="Abrir ubicación de red en PC">
+    </div>
+    <div class="paso">
+      <p>3. Pega el enlace y pulsa "Reproducir"</p>
+      <img src="Tutorial/PC/3.png" alt="Pegar enlace en PC">
+    </div>
+  </div>
+
+  <!-- Tutorial Móvil -->
+  <div id="tutorial-movil" class="tutorial">
+    <h2 style="text-align: center;">Tutorial para Móvil</h2>
+    <div class="paso">
+      <p>1. Abre la app VLC</p>
+    </div>
+    <div class="paso">
+      <p>2. Toca el icono de 3 puntos (Más) y elige "Nuevo flujo"</p>
+      <img src="Tutorial/Movil/1.jpeg" alt="Menú transmisión" style="width: 50vh;">
+    </div>
+    <div class="paso">
+      <p>3. Pega el enlace y pulsa el boton de reproducir</p>
+      <img src="Tutorial/Movil/2.jpeg" alt="Pegar y reproducir" style="width: 50vh;">
+    </div>
+    <div class="paso">
+      <p>4. Espera unos segundos a que cargue. Si hay un error, aparecerá de inmediato tras pulsar reproducir.</p>
+    </div>
+  </div>
+
+  <!-- Visor de imágenes ampliadas -->
+  <div id="imgViewer" class="img-overlay" style="display:none;" onclick="cerrarImagen()">
+    <span class="close-btn" onclick="cerrarImagen(event)">❌</span>
+    <img id="zoomedImg" src="" alt="Imagen ampliada">
+  </div>
+
+  <!-- Lista M3U8 -->
+  <br><br><br>
+  <div>
+    <p>Lista M3U8 con más de 100 canales en <a style="color: #4caf50;" href="https://lc.cx/ACEVLC">https://lc.cx/ACEVLC</a></p>
+    <p>Introduce la URL en VLC (Ubicación de Red / Nuevo flujo) o descárgala y ábrela en VLC</p>
+    <p style="color: red;">NOTA: En móvil es mejor descargarla y abrir con VLC. Si se actualiza, deberás volver a descargarla.</p>
+  </div>
+
+  <!-- Horario -->
+  <div style="margin-top: 3rem; background-color: #2c2c3e; border-radius: 12px; color: #fff; padding: 1.5rem 2rem; max-width: 400px; text-align: left;">
+    <h2 style="text-align: center; margin-bottom: 1rem; font-size: 1.2rem;">🕒 Horario del Servidor</h2>
+    <table style="width: 100%; border-collapse: collapse; font-size: 1rem;">
+      <tbody>
+        <tr><td style="padding: 6px 10px;">Lunes</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
+        <tr><td style="padding: 6px 10px;">Martes</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
+        <tr><td style="padding: 6px 10px;">Miércoles</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
+        <tr><td style="padding: 6px 10px;">Jueves</td><td style="padding: 6px 10px; text-align: right;">11:00 - 23:59</td></tr>
+        <tr><td style="padding: 6px 10px;">Viernes</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Sábado</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+        <tr><td style="padding: 6px 10px;">Domingo</td><td style="padding: 6px 10px; text-align: right;">07:00 - 01:30</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Sección FAQ -->
+<div style="margin-top: 4rem; max-width: 800px; width: 100%;">
+  <h2 style="text-align: center; margin-bottom: 1rem; font-size: 1.5rem;">❓ Preguntas Frecuentes (FAQ)</h2>
+  
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Necesito tener AceStream instalado?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      No, este sitio convierte los enlaces a un formato que puedes abrir directamente en VLC sin tener que instalar AceStream.
+    </div>
+  </div>
+
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Este sitio funciona en todos los dispositivos?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      Sí, puedes generar el enlace desde cualquier dispositivo. Para reproducirlo, necesitas tener VLC Media Player instalado.
+    </div>
+  </div>
+
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Se puede compartir el enlace generado con otras personas?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      Sí, el enlace HTTP generado puede ser compartido. Sin embargo, si el servidor está apagado, no funcionará.
+    </div>
+  </div>
+
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Cuántas personas pueden ver contenido al mismo tiempo?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      El servidor está diseñado para manejar aproximadamente más de 15 personas. Si se supera, puede haber interrupciones.
+    </div>
+  </div>
+
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Por qué no me carga el canal en VLC?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      Asegúrate de que el servidor esté activo. También puede ser que el canal no esté disponible en ese momento. Prueba con otro o revisa tu conexión.
+    </div>
+  </div>
+
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Cuando dejará de ser "Beta"?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      La version "Beta" se mantendrá durante 1-2 meses. Durante este tiempo, se realizarán pruebas y ajustes para mejorar la estabilidad y el rendimiento del servicio.
+    </div>
+  </div>
+
+  <div class="faq-item" style="background-color: #2c2c3e; margin-bottom: 1rem; border-radius: 8px; overflow: hidden;">
+    <button class="faq-question" style="width: 100%; background: none; border: none; color: #fff; text-align: left; padding: 1rem; font-size: 1rem; font-weight: bold; display: flex; justify-content: space-between; cursor: pointer;">
+      ¿Que pasará después de la "Beta"?
+      <span class="faq-icon"></span>
+    </button>
+    <div class="faq-answer" style="display: none; padding: 0 1rem 1rem; font-size: 0.95rem; color: #ccc;">
+      El servicio seguirá siendo GRATIS y se mantendrá la misma funcionalidad.
+    </div>
+  </div>
+</div>
+
+  <script>
+    let finalUrl = '';
+
+    function extraerPID(enlace) {
+      return enlace.replace('acestream://', '').trim();
+    }
+
+    function generar() {
+      const input = document.getElementById('acestreamInput').value.trim();
+      const errorDiv = document.getElementById('errorMsg');
+      errorDiv.style.display = 'none';
+
+      if (!input) {
+        errorDiv.textContent = "⚠️ Ingresa un enlace o hash de AceStream";
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      const pid = extraerPID(input);
+      if (pid.length < 20) {
+        errorDiv.textContent = "⚠️ El hash parece inválido";
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      finalUrl = `http://34.172.252.191:8000/pid/${pid}/stream.mp4`;
+      document.getElementById('linkOutput').innerText = finalUrl;
+      document.getElementById('acestreamInput').value = '';
+      document.getElementById('resultado').style.display = 'block';
+    }
+
+    function copiar() {
+      if (!finalUrl) return;
+      navigator.clipboard.writeText(finalUrl).then(() => {
+        const msg = document.getElementById('copiadoMsg');
+        msg.style.display = 'block';
+        setTimeout(() => {
+          msg.style.display = 'none';
+        }, 3000);
+      });
+    }
+
+    function mostrarSelector() {
+      document.getElementById('selector').style.display = 'block';
+    }
+
+    function mostrarTutorial(tipo) {
+      document.getElementById('tutorial-pc').style.display = 'none';
+      document.getElementById('tutorial-movil').style.display = 'none';
+
+      if (tipo === 'pc') {
+        document.getElementById('tutorial-pc').style.display = 'block';
+      } else {
+        document.getElementById('tutorial-movil').style.display = 'block';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.paso img').forEach(img => {
+        img.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.getElementById('zoomedImg').src = img.src;
+          document.getElementById('imgViewer').style.display = 'flex';
+        });
+      });
+    });
+
+    function cerrarImagen(event) {
+      if (!event || event.target === event.currentTarget || event.target.classList.contains('close-btn')) {
+        document.getElementById('imgViewer').style.display = 'none';
+        document.getElementById('zoomedImg').src = '';
+      }
+    }
+
+    // Indicador de estado del servidor según horario
+    function verificarEstadoServidor() {
+      const ahora = new Date();
+      const dia = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 6 = Sábado
+      const hora = ahora.getHours();
+      const minutos = ahora.getMinutes();
+
+      const horarios = {
+        0: ['07:00', '01:30'],
+        1: ['11:00', '23:59'],
+        2: ['11:00', '23:59'],
+        3: ['11:00', '23:59'],
+        4: ['11:00', '23:59'],
+        5: ['07:00', '01:30'],
+        6: ['07:00', '01:30'],
+      };
+
+      function horaAminutos(horaStr) {
+        const [h, m] = horaStr.split(':').map(Number);
+        return h * 60 + m;
+      }
+
+      let minutosActuales = hora * 60 + minutos;
+      const [inicioStr, finStr] = horarios[dia];
+      const inicio = horaAminutos(inicioStr);
+      let fin = horaAminutos(finStr);
+
+      if (fin < inicio) {
+        if (minutosActuales < inicio) {
+          const diaAnterior = (dia + 6) % 7;
+          const [prevInicioStr, prevFinStr] = horarios[diaAnterior];
+          const prevInicio = horaAminutos(prevInicioStr);
+          const prevFin = horaAminutos(prevFinStr);
+          if (prevFin < prevInicio && minutosActuales <= prevFin) {
+            mostrarEstado(true);
+            return;
+          }
+        }
+        fin += 1440;
+        if (minutosActuales < inicio) {
+          minutosActuales += 1440;
+        }
+      }
+
+      const activo = minutosActuales >= inicio && minutosActuales <= fin;
+      mostrarEstado(activo);
+    }
+
+    function mostrarEstado(activo) {
+      const texto = document.getElementById('estado-texto');
+      const circulo = document.getElementById('estado-circulo');
+      if (activo) {
+        texto.textContent = 'Activo';
+        texto.style.color = '#4caf50';
+        circulo.style.backgroundColor = '#4caf50';
+      } else {
+        texto.textContent = 'Apagado';
+        texto.style.color = '#f44336';
+        circulo.style.backgroundColor = '#f44336';
+      }
+    }
+
+    // Acordeón FAQ
+  document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const answer = btn.nextElementSibling;
+      const icon = btn.querySelector('.faq-icon');
+      const item = btn.closest('.faq-item');
+      const isVisible = answer.style.display === 'block';
+
+      // Cerrar todos los demás
+      document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+      document.querySelectorAll('.faq-icon').forEach(i => i.textContent = '');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+
+      if (!isVisible) {
+        answer.style.display = 'block';
+        icon.textContent = '';
+        item.classList.add('open'); // <-- aquí se añade la clase
+      }
+    });
+  });
+});
+
+
+    document.addEventListener('DOMContentLoaded', verificarEstadoServidor);
+  </script>
+
+</body>
+</html>
