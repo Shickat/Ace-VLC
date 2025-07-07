@@ -420,7 +420,7 @@ button:hover {
         return;
       }
 
-      finalUrl = `http://34.66.19.40:8000/pid/${pid}/stream.mp4`;
+      finalUrl = `http://34.175.41.50:8000/pid/${pid}/stream.mp4`;
       document.getElementById('linkOutput').innerText = finalUrl;
       document.getElementById('acestreamInput').value = '';
       document.getElementById('resultado').style.display = 'block';
@@ -521,7 +521,7 @@ button:hover {
       const texto = document.getElementById('estado-texto');
       const circulo = document.getElementById('estado-circulo');
       if (activo) {
-        texto.textContent = 'EN MANTENIMIENTO';
+        texto.textContent = 'Activo';
         texto.style.color = '#4caf50';
         circulo.style.backgroundColor = '#4caf50';
       } else {
